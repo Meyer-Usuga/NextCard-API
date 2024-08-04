@@ -9,6 +9,10 @@ Use App\Models\Group;
 
 class GroupsController extends Controller
 {
+    /**
+     * Método para mostrar todos los grupos
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(): JsonResponse
     {
         $groups = Group::all();
@@ -31,6 +35,11 @@ class GroupsController extends Controller
         return response()->json($data); 
     }
 
+    /**
+     * Método para registrar un grupo
+     * @param \App\Http\Requests\GroupRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(GroupRequest $request): JsonResponse
     {
         $group = Group::create($request->all()); 
@@ -44,6 +53,11 @@ class GroupsController extends Controller
         return response()->json($data); 
     }
 
+    /**
+     * Método para mostrar un grupo por ID
+     * @param mixed $id
+     * @return JsonResponse|mixed
+     */
     public function show($id)
     {
         $group = Group::find($id); 
@@ -66,6 +80,12 @@ class GroupsController extends Controller
         return response()->json($data);
     }
 
+    /**
+     *  Método para actualizar un grupo
+     * @param \App\Http\Requests\GroupRequest $request
+     * @param string $id
+     * @return JsonResponse|mixed
+     */
     public function update(GroupRequest $request, string $id)
     {
         $group = Group::find($id); 

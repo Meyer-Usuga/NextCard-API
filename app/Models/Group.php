@@ -9,7 +9,18 @@ class Group extends Model
 {
     use HasFactory;
 
-    protected $guarded = [
-        'id'
+    protected $fillable = [
+        'code',
+        'name',
+        'period',
+        'students',
+        'teacherId',
+        'status'
     ]; 
+
+    //Método para devolver todos los usuarios asociados al grupo
+
+    public function user(){
+        return $this->hasMany(User::class);
+    }
 }

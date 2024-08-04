@@ -4,10 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GroupRequest extends FormRequest
+class UserRequest extends FormRequest
 {
     /**
-     * Permitimos que se realicen peticiones a nuestra entidad
+     * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
@@ -15,16 +15,18 @@ class GroupRequest extends FormRequest
     }
 
     /**
-     * Definimos las reglas para el request
+     * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'code' => 'required|max:30|min:3',
-            'name' => 'required|max:300|min:3',
-            'period' => 'required',
+            'document' => 'required|unique:users|min:5|max:13', 
+            'name' => 'required',
+            'phone' => 'min:5|max:13',
+            'email' => 'email:unique:users', 
+            'rol' => 'required', 
             'status' => 'required'
         ];
     }

@@ -2,46 +2,39 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class User extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    //Todos los datos podrán ser asignados en una sola acción
+    protected $guarded = [];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    //PERTENECE A: Método para devolver el grupo al que pertenece un usuario
+    public function group(){
+        return $this->belongsTo(Group::class, 'groupId');
+    }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    //TIENE UN: Méodo para devolver el carnet que posee un usuario
+    public function card(){
+        return $this->hasOne(Card::class, 'id');
+    }
+
+    //PERTENECE A: Metodo para devolver el rol que posee un usuario
+    public function role()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(Role::class, 'rol');
+    }
+
+    //TIENE UNAS: Metodo para devolver todas las entradas del usuario
+    public function entry(){
+        return $this->hasMany(userEntry::class, 'userId'); 
+    }
+    
+    //TIENE UNAS: Metodo para devolver todas las salidas del usuario
+    public function exit(){
+        return $this->hasMany(userExit::class, 'userId'); 
     }
 }

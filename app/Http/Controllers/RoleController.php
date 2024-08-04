@@ -10,7 +10,8 @@ use App\Models\Role;
 class RoleController extends Controller
 {
     /**
-     * GET: Método que lista todos los roles 
+     * Método que muestra todos los roles
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(): JsonResponse
     {
@@ -34,7 +35,9 @@ class RoleController extends Controller
     }
 
     /**
-     * POST: Método que permite crear un rol
+     * Método que registra un nuevo rol
+     * @param \App\Http\Requests\RoleRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(RoleRequest $request): JsonResponse
     {
@@ -50,7 +53,9 @@ class RoleController extends Controller
     }
 
     /**
-     * GET: Método para obtener un rol por id
+     * Método que permite mostrar un rol por id
+     * @param mixed $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id): JsonResponse
     {
