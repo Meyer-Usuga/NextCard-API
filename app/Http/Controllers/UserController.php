@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,8 +17,8 @@ class UserController extends Controller
      */
     public function index(): JsonResponse
     {
-        /** Obtenemos todos los usuarios */
-        $users = User::with('entry', 'exit')->get(); 
+        /** Obtenemos la colección de usuarios */
+        $users = User::all();
 
         if ($users) {
             $data = array(

@@ -116,4 +116,37 @@ class GroupsController extends Controller
 
         return response()->json($data); 
     }
+
+        /**
+     * Método para obtener estudiantes por grupo
+     * @param string $groupId
+     * @return JsonResponse|mixed
+     */
+    public function getStudents(string $groupId){
+
+        $ROL_STUDENT = 3; 
+
+        /** Obtenemos el grupo */
+        $group = Group::find($groupId);
+        /** Médiante la relación 1 a muchos obtenemos sus usuarios con rol */
+        $students = $group->user()->where('rol', $ROL_STUDENT)->get();
+
+        if(!$students->isEmpty()){
+            $data = array(
+                'status' => "success",
+                'code' => 200,
+                'data' => $students
+            );
+        }
+        else{
+            $data = array(
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'No se encontraron estudiantes'
+            );
+        }
+
+        return response()->json($data);
+
+    }
 }

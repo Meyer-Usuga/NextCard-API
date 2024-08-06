@@ -15,6 +15,8 @@ class userEntry extends Model
         'entryDate'
     ];
 
+    protected $hidden = ['created_at', 'updated_at'];
+
     //PERTENECE A: Metodo para devolver el usuario relacionado a la entrada
     public function user(){
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\EntryController;
 use App\Http\Controllers\ExitController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\RoleController;
@@ -9,20 +10,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 //----------------- Rutas roles ----------------------
-Route::resource('/role',RoleController::class);
+Route::resource('/role', RoleController::class);
 
 //----------------- Rutas grupos ----------------------
-Route::resource('/group',GroupsController::class); 
+Route::resource('/group', GroupsController::class);
+Route::get('group/students/{groupId}', [GroupsController::class, 'getStudents']);
 
 //----------------- Rutas carnets ----------------------
-Route::resource('/card', CardController::class); 
+Route::resource('/card', CardController::class);
+Route::get('card/byuser/{userId}', [CardController::class, 'getCardByUser']);
 
 //----------------- Rutas users ----------------------
 Route::resource('/user', UserController::class);
-Route::post('user/login', [UserController::class, 'login']); 
+Route::post('user/login', [UserController::class, 'login']);
 
 //----------------- Rutas ingresos ----------------------
-
+Route::resource('/entries', EntryController::class);
 
 //----------------- Rutas salidas ----------------------
 Route::resource('/exits', ExitController::class);

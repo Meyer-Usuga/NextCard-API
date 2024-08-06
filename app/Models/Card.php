@@ -18,6 +18,9 @@ class Card extends Model
         'status'
     ]; 
 
+    //No mostraremos
+    protected $hidden = ['created_at', 'updated_at'];
+
     //Metodo para devolver el usuario asociado al carnet
     public function User(){
         return $this->belongsTo(User::class); 

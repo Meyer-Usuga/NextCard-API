@@ -12,6 +12,9 @@ class User extends Model
     //Todos los datos podrán ser asignados en una sola acción
     protected $guarded = [];
 
+    //No mostraremos
+    protected $hidden = ['created_at', 'updated_at'];
+
     //PERTENECE A: Método para devolver el grupo al que pertenece un usuario
     public function group(){
         return $this->belongsTo(Group::class, 'groupId');

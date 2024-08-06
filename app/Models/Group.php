@@ -18,9 +18,11 @@ class Group extends Model
         'status'
     ]; 
 
+    protected $hidden = ['created_at', 'updated_at'];
+
     //Método para devolver todos los usuarios asociados al grupo
 
     public function user(){
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'groupId');
     }
 }

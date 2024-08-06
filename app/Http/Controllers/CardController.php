@@ -79,6 +79,34 @@ class CardController extends Controller
 
         return response()->json($data);
     }
+    
+    /**
+     * Método para obtener un carnet por usuario
+     * @param mixed $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCardByUser($id): JsonResponse
+    {
+        $card = Card::where('userId', $id)->first(); 
+
+        if($card){
+            $data = array(
+                'status' => "success", 
+                'code' => 200,
+                'data' => $card
+            );
+        }
+        else{
+            $data = array(
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'No se encontró el carnet especificado'
+            );
+        }
+    
+        return response()->json($data);
+    }
+
 
     /**
      * Método para actualizar un carnet
