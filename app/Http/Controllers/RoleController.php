@@ -57,7 +57,7 @@ class RoleController extends Controller
      * @param mixed $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id): JsonResponse
+    public function show(string $id): JsonResponse
     {
         $role = Role::find($id);
 

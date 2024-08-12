@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
-use App\Models\Group;
+use App\Models\Card;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -158,6 +158,45 @@ class UserController extends Controller
 
         return response()->json($data);
     }
+    
+    /**
+     * Método para inactivar/activar un carnet y usuario
+     * @param string $userId
+     * @return JsonResponse|mixed
+     */
+    public function updateStatus(string $userId)
+    {
+        /** Consultamos el usuario */
+        $user = User::find($userId);
+
+        if ($user) {
+
+            /** Cambiamos el estado a ambos */
+            if ($user->status == 0) {
+                $user->status = 1;
+            } else {
+                $user->status = 0;
+            }
+
+            $user->save();
+
+            $data = array(
+                'status' => 'success',
+                'code' => 200,
+                'data' => $user
+            );
+
+        } else {
+            $data = array(
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'No se encontró el usuario especificado'
+            );
+        }
+
+        return response()->json($data);
+    }
+
 
     /**
      * Método que permite loguear un usuario
