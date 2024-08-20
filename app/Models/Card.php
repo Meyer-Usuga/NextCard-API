@@ -23,7 +23,7 @@ class Card extends Model
 
     //Metodo para devolver el usuario asociado al carnet
     public function User(){
-        return $this->belongsTo(User::class); 
+        return $this->belongsTo(User::class, 'user', 'document'); 
     }
 
 }

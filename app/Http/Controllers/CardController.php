@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CardRequest;
 use App\Models\Card;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use PhpParser\Node\Stmt\Echo_;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class CardController extends Controller
@@ -40,7 +38,7 @@ class CardController extends Controller
 
     /**
      * Método para crear un carnet
-     * @param \App\Http\Requests\CardRequest $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request): JsonResponse
@@ -159,78 +157,79 @@ class CardController extends Controller
 
     /**
      * Método para actualizar un carnet
-     * @param \App\Http\Requests\CardRequest $request
+     * @param \Illuminate\Http\Request $request
      * @param string $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        /** Obtenemos datos formdata */
-        $image_card = $request->file('image');
-        $request = json_decode($request->input('card', true));
-
-        /** Obtenemos el carnet */
+        /** Buscamos el carnet */
         $card = Card::find($id);
 
         if ($card) {
-
             if ($card->user != $request->user) {
 
-                /** Validamos datos */
-                $belongsToUser = User::where('user', $request->user)
-                    ->where('id', '!=', $card->id)->exists();
+                /** Verificamos que el nuevo documento exista en bas de datos*/
+                $user = User::where('document', $request->user)->exists();
 
-                if (!$belongsToUser) {
+                if ($user) {
 
-                    /** Path constante para laravel storage */
-                    $fileRoute = 'storage/images/';
+                    /** Validamos que el nuevo usuario asociado sea único */
+                    $belongsToUser = Card::where('user', $request->user)->where('id', '!=', $card->id)->exists();
 
-                    /** Generamos nuevo QR */
-                    $qrName = 'qr' . $card->user . '.png';
-                    $qrUrl = $fileRoute . 'qr/' . $qrName;
-                    $qrCode = QrCode::format('png')->size(300)->generate($request->user);
+                    if (!$belongsToUser) {
 
-                    /** Eliminamos el QR actual y guardamos el nuevo */
-                    Storage::disk('public')->delete($qrUrl);
-                    Storage::disk('public')->put('images/qr/' . $qrName, $qrCode);
+                        /** Eliminamos el QR actual */
+                        $qrUrl = explode('storage/', $card->urlQr);
+                        Storage::disk('public')->delete($qrUrl[1]);
 
-                    /** Actualizamos la imagen */
-                    $imageName = 'user' . $request->user . '.' . $image_card->extension();
-                    $imageUrl = $fileRoute . 'user/' . $imageName;
+                        /** Generamos nuevo QR */
+                        $fileRoute = 'storage/images/';
+                        $qrName = 'qr' . $request->user . '.png';
+                        $qrUrl = $fileRoute . 'qr/' . $qrName;
+                        $qrCode = QrCode::format('png')->size(300)->generate($request->user);
+                        Storage::disk('public')->put('images/qr/' . $qrName, $qrCode);
 
-                    /** Eliminamos la imagen actual y guardamos la nueva */
-                    Storage::disk('public')->delete($imageUrl);
-                    Storage::disk('public')->putFileAs('images/user', $image_card, $imageName);
+                        /** Guardamos datos */
+                        $card->user = $request->user;
+                        $card->urlQr = $qrUrl;
+                        $card->save();
 
-                    /** Guardamos todos los datos */
-                    $card->urlQr = $qrUrl;
-                    $card->imageUrl = $imageUrl;
-                    $card->user = $request->user;
-
-                    $data = array(
-                        'status' => 'success',
-                        'code' => 200,
-                        'message' => 'Se actualizó el carnet y el codigo QR',
-                    );
-                } else {
+                        $data = array(
+                            'status' => 'success',
+                            'code' => 200,
+                            'message' => 'Se actualizó el carnet y el codigo QR',
+                        );
+                    } 
+                    else {
+                        $data = array(
+                            'status' => 'error',
+                            'code' => 409,
+                            'message' => 'El usuario ingresado ya posee un carnet'
+                        );
+                    }
+                } 
+                else {
                     $data = array(
                         'status' => 'error',
-                        'code' => 409,
-                        'message' => 'El usuario ingresado ya posee un carnet'
+                        'code' => 404,
+                        'message' => 'El usuario asociado al carnet no existe'
                     );
                 }
-            } else {
+            } 
+            else {
                 $card->expiryDate = $request->expiryDate;
-                $card->status = $request->status;
+                $card->status = $request->status; 
+                $card->save();
 
                 $data = array(
                     'status' => 'success',
                     'code' => 200,
-                    'message' => 'Se actualizó pero no se genero nuevo qr',
+                    'message' => 'Se actualizó el carnet pero no se genero nuevo qr',
                 );
             }
-            $card->save();
-        } else {
+        } 
+        else {
             $data = array(
                 'status' => 'error',
                 'code' => 404,
@@ -241,6 +240,12 @@ class CardController extends Controller
         return response()->json($data);
     }
 
+    /**
+     * Método para cargar la imagen a un carnet
+     * @param \Illuminate\Http\Request $request
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function uploadImage(Request $request, string $id): JsonResponse
     {
         $card = Card::find($id);

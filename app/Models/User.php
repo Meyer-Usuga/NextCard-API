@@ -13,7 +13,7 @@ class User extends Model
     protected $guarded = [];
 
     //No mostraremos
-    protected $hidden = ['created_at', 'updated_at'];
+    protected $hidden = ['password', 'created_at', 'updated_at'];
 
     //PERTENECE A: Método para devolver el grupo al que pertenece un usuario
     public function group(){
@@ -22,7 +22,7 @@ class User extends Model
 
     //TIENE UN: Méodo para devolver el carnet que posee un usuario
     public function card(){
-        return $this->hasOne(Card::class, 'id');
+        return $this->hasOne(Card::class, 'user', 'document');
     }
 
     //PERTENECE A: Metodo para devolver el rol que posee un usuario

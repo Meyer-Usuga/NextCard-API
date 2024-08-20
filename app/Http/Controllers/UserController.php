@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -79,7 +82,8 @@ class UserController extends Controller
     {
         /** Obtenemos la data del usuario */
         $user = User::find($id);
-
+        $user_card = $user->card->urlImage;
+        
         if ($user) {
             $data = array(
                 'status' => "success",
@@ -118,27 +122,40 @@ class UserController extends Controller
 
             if (!$exist_document && !$exist_email) {
 
-                /** Actualizamos */
-                $user->document = $request->document;
-                $user->name = $request->name;
-                $user->phone = $request->phone;
-                $user->email = $request->email;
-                $user->groupId = $request->groupId;
-                $user->rol = $request->rol;
-                $user->status = $request->status;
-
-                /** Verificamos si se cambio la contraseña*/
-                if (!Hash::check($request->password, $user->password)) {
-                    $user->password = Hash::make($request->password);
+                /** Actualizamos QR si posee */
+                if ($user->document != $request->document) {
+                    if(Card::where('user', $user->document)->exists()){
+                        $this->updateFiles($request, $user->document); 
+                    }
                 }
+                /** Guardamos datos*/
+                try{
+                    $user->document = $request->document;
+                    $user->name = $request->name;
+                    $user->phone = $request->phone;
+                    $user->email = $request->email;
+                    $user->groupId = $request->groupId;
+                    $user->rol = $request->rol;
+                    $user->status = $request->status;
 
-                $user->save();
+                    /** Verificamos si se cambio la contraseña */
+                    if (!empty($request->password)) {
 
-                $data = array(
-                    'status' => 'success',
-                    'code' => 200,
-                    'data' => $user
-                );
+                        if (!Hash::check($request->password, $user->password)) {
+                            $user->password = Hash::make($request->password);
+                        }
+                    }
+                    $user->save();
+
+                    $data = array(
+                        'status' => 'success',
+                        'code' => 200,
+                        'data' => $user
+                    );
+                }
+                catch(\Exception $e){
+                    Log::error('Error al guardar el usuario' . $e->getMessage());
+                }
 
             } else {
                 $data = array(
@@ -158,7 +175,42 @@ class UserController extends Controller
 
         return response()->json($data);
     }
-    
+
+    /**
+     * Método para actualizar codigo QR e imágen del carnet de un usuario
+     * @param mixed $request_data
+     * @param mixed $currentDocument
+     * @return void
+     */
+    public function updateFiles($request_data, $currentDocument){
+        
+        /** Generamos un nuevo QR para el carnet asociado */
+        $card_user = Card::where('user', $currentDocument)->first();
+
+        if (!is_null($card_user)) {
+
+            /** Eliminamos el QR actual */
+            $qrUrl = explode('storage/', $card_user->urlQr);
+            Storage::disk('public')->delete($qrUrl[1]);
+
+            /** Generamos nuevo QR */
+            $fileRoute = 'storage/images/';
+            $qrName = 'qr' . $request_data->document . '.png';
+            $qrUrl = $fileRoute . 'qr/' . $qrName;
+            $qrCode = QrCode::format('png')->size(300)->generate($request_data->document);
+            Storage::disk('public')->put('images/qr/' . $qrName, $qrCode);
+
+            /** Guardamos datos */
+            try{
+                $card_user->urlQr = $qrUrl;
+                $card_user->save();
+            }
+            catch(\Exception $e){
+                Log::error('Error al guardar el carnet' . $e->getMessage());
+            }
+        }
+    }
+
     /**
      * Método para inactivar/activar un carnet y usuario
      * @param string $userId

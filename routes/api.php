@@ -19,7 +19,7 @@ Route::get('group/students/{groupId}', [GroupsController::class, 'getStudents'])
 //----------------- Rutas carnets ----------------------
 Route::resource('/card', CardController::class);
 Route::get('card/byuser/{userId}', [CardController::class, 'getCardByUser']);
-Route::post('card/uploadImage/{userId}', [CardController::class, 'uploadImage']);
+Route::post('card/uploadImage/{cardId}', [CardController::class, 'uploadImage']);
 
 //----------------- Rutas users ----------------------
 Route::resource('/user', UserController::class);
